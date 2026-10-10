@@ -1,0 +1,32 @@
+
+name: Cleanup Student Infrastructure
+
+on:
+  workflow_dispatch:
+    inputs:
+      student_suffix:
+        description: 'Student Suffix'
+        required: true
+        type: string
+
+jobs:
+  cleanup:
+    name: Destroy AWS Resources
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
+
+      - name: Run Cleanup Script
+        env:
+          STUDENT_SUFFIX: ${{ inputs.student_suffix }}
+          AWS_REGION: ${{ vars.AWS_REGION || 'us-east-1' }}
+        run: bash scripts/destroy.sh
